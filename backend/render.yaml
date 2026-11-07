@@ -1,0 +1,183 @@
+services:
+  - type: web
+    name: business-automation-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /ready
+    # Keep one instance while media uses the attached persistent disk.
+    disk:
+      name: bizpilotpro-media
+      mountPath: /var/data
+      sizeGB: 10
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      # Set after checking how many proxies sit in front of the API (see docs/authentication-api.md).
+      - key: TRUSTED_PROXY_COUNT
+        sync: false
+      - key: LOGIN_IP_MAX_FAILED_ATTEMPTS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MEDIA_STORAGE_DIR
+        value: /var/data/media
+      - key: MEDIA_PUBLIC_BASE_URL
+        sync: false
+      # Comma-separated production frontend origins, e.g. https://app.example.com
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SCHEDULER_WORKER_ENABLED
+        value: "true"
+      - key: SCHEDULER_POLL_INTERVAL_SECONDS
+        value: "15"
+      # Password reset links and email delivery (see docs/authentication-api.md).
+      - key: FRONTEND_BASE_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: PLATFORM_ADMIN_EMAILS
+        sync: false
+      - key: SOCIAL_TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: BILLING_AUTHORIZATION_ENCRYPTION_KEY
+        sync: false
+      - key: BILLING_RENEWALS_ENABLED
+        value: "false"
+      - key: BILLING_RENEWAL_NOTIFICATIONS_ENABLED
+        value: "false"
+      # Social OAuth apps (leave unset until the provider app is approved; see docs/).
+      - key: META_APP_ID
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: META_REDIRECT_URI
+        sync: false
+      - key: META_FRONTEND_RETURN_URL
+        sync: false
+      - key: FACEBOOK_REDIRECT_URI
+        sync: false
+      - key: FACEBOOK_FRONTEND_RETURN_URL
+        sync: false
+      - key: TIKTOK_CLIENT_KEY
+        sync: false
+      - key: TIKTOK_CLIENT_SECRET
+        sync: false
+      - key: TIKTOK_REDIRECT_URI
+        sync: false
+      - key: TIKTOK_FRONTEND_RETURN_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: YOUTUBE_REDIRECT_URI
+        sync: false
+      - key: YOUTUBE_FRONTEND_RETURN_URL
+        sync: false
+      - key: GOOGLE_LOGIN_CLIENT_ID
+        sync: false
+      - key: GOOGLE_LOGIN_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_LOGIN_REDIRECT_URI
+        sync: false
+      - key: GOOGLE_LOGIN_FRONTEND_RETURN_URL
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_OTP_TEMPLATE_NAME
+        sync: false
+
+  - type: cron
+    name: bizpilotpro-billing-maintenance
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: python -m app.jobs.run_billing_maintenance
+    schedule: "*/5 * * * *"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: MEDIA_PUBLIC_BASE_URL
+        sync: false
+      - key: FRONTEND_BASE_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_USE_STARTTLS
+        value: "true"
+      - key: EMAIL_FROM
+        sync: false
+      - key: BILLING_RENEWAL_NOTIFICATIONS_ENABLED
+        value: "false"
+      - key: BILLING_RENEWALS_ENABLED
+        value: "false"
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: BILLING_AUTHORIZATION_ENCRYPTION_KEY
+        sync: false
+
+  # Polls YouTube for videos that were uploaded but are still processing, so status
+  # does not depend on a browser tab staying open.
+  - type: cron
+    name: bizpilotpro-youtube-processing
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: python -m app.jobs.poll_youtube_processing
+    schedule: "*/5 * * * *"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: MEDIA_PUBLIC_BASE_URL
+        sync: false
+      - key: SOCIAL_TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false

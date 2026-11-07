@@ -1,0 +1,9 @@
+# DEMO deployment on Render: nothing to configure. Set the Blueprint path to backend/render.demo.yaml
+# (or create a Docker web service with Dockerfile path ./backend/Dockerfile.demo and context ./backend).
+services:
+  - type: web
+    name: bizpilotpro-demo-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile.demo
+    dockerContext: ./backend
+    healthCheckPath: /health

@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: autobizpro-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: business_automation
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: dev_only_change_me
+    ports:
+      # Bind to localhost only; this database is for local development.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - autobizpro_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d business_automation"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: autobizpro-redis
+    restart: unless-stopped
+    ports:
+      # Local development only.
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  autobizpro_postgres_data:
