@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEMO_MODE=true \
     APP_ENV=staging \
-    DATABASE_URL=sqlite+pysqlite:///./demo.db \
+    DATABASE_URL=sqlite+pysqlite:///./demo.db
 
 WORKDIR /app
 
